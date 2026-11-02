@@ -94,6 +94,10 @@ class DetectionPipelineTestCase(unittest.TestCase):
         sample_path = os.path.abspath(
             os.path.join(EVIDENCE_DIR, "..", "..", "output_annotated.jpg")
         )
+        if not os.path.exists(sample_path):
+            sample_path = os.path.abspath(
+                os.path.join(EVIDENCE_DIR, "..", "..", "number_plate", "test_images", "bike_01.jpg")
+            )
         if os.path.exists(sample_path):
             with open(sample_path, "rb") as f:
                 content = f.read()

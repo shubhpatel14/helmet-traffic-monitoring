@@ -145,6 +145,12 @@ async function loadStats() {
     document.getElementById("statPending").innerText = stats.pending_review;
     document.getElementById("statApproved").innerText = stats.approved_violations;
     document.getElementById("statRejected").innerText = stats.rejected_violations;
+    if (document.getElementById("statPlates")) {
+      document.getElementById("statPlates").innerText = stats.plates_detected ?? 0;
+    }
+    if (document.getElementById("statUnreadable")) {
+      document.getElementById("statUnreadable").innerText = stats.unreadable_plates ?? 0;
+    }
   } catch (err) {
     console.error("Failed to load statistics:", err);
   }

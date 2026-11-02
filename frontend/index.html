@@ -28,21 +28,22 @@
 
   <main class="dashboard-container">
 
-    <!-- Model Status & Training Banner -->
-    <div class="model-status-banner" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 8px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+    <!-- Model Status & Active Pipeline Banner -->
+    <div class="model-status-banner" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 8px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
       <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 1.25rem;">⏳</span>
+        <span style="font-size: 1.25rem;">⚡</span>
         <div>
-          <div style="font-size: 0.88rem; font-weight: 700; color: #FBBF24;">
-            Helmet Model: Final Training In Progress
+          <div style="font-size: 0.88rem; font-weight: 700; color: #10B981;">
+            Live Computer Vision Pipeline Active
           </div>
           <div style="font-size: 0.78rem; color: #CBD5E1; margin-top: 2px;">
-            Inference in this interface is for workflow testing only and does not represent validated final-model predictions. Final trained weights will be integrated upon training completion.
+            Dual AI Engine: Real-time Helmet Detection (YOLOv8) + Vehicle License Plate Detection (YOLOv8) & Text Recognition (EasyOCR).
           </div>
         </div>
       </div>
-      <div>
-        <span class="badge badge-pending">Training In Progress</span>
+      <div style="display: flex; gap: 8px;">
+        <span class="badge badge-compliant">YOLOv8 Helmet Active</span>
+        <span class="badge" style="background: rgba(56,189,248,0.15); color: #38BDF8; border: 1px solid #38BDF8;">YOLOv8 + EasyOCR Active</span>
       </div>
     </div>
 
@@ -59,6 +60,14 @@
       <div class="kpi-card">
         <div class="kpi-label">Helmet Compliant <span>✅</span></div>
         <div class="kpi-value compliant" id="statCompliant">--</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Plates Recognized <span>🚘</span></div>
+        <div class="kpi-value" id="statPlates" style="color:var(--accent-cyan);">--</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Unreadable Plates <span>❓</span></div>
+        <div class="kpi-value" id="statUnreadable" style="color:var(--accent-amber);">--</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Pending Review <span>⏳</span></div>

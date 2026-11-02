@@ -13,11 +13,14 @@ from sqlalchemy import func, select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.database import engine, get_db
+from app.database import Base, engine, get_db
 from app.models import Violation
 from app.services.pipeline_service import analyze_traffic_image
 
 load_dotenv()
+
+# Ensure database tables exist automatically on startup
+Base.metadata.create_all(bind=engine)
 
 EVIDENCE_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "evidence"
@@ -125,6 +128,8 @@ class StatsResponse(BaseModel):
     pending_review: int
     approved_violations: int
     rejected_violations: int
+    plates_detected: int = 0
+    unreadable_plates: int = 0
 
 
 class AnalyzeResultResponse(BaseModel):
@@ -438,6 +443,24 @@ def get_statistics(db: Session = Depends(get_db)):
         )
         or 0
     )
+    plates_detected = (
+        db.scalar(
+            select(func.count(Violation.id)).where(Violation.number_plate.is_not(None))
+        )
+        or 0
+    )
+    unreadable_plates = (
+        db.scalar(
+            select(func.count(Violation.id)).where(
+                (Violation.recognition_status == "unreadable")
+                | (
+                    Violation.number_plate.is_(None)
+                    & Violation.detector_confidence.is_not(None)
+                )
+            )
+        )
+        or 0
+    )
 
     return StatsResponse(
         total_detections=total_detections,
@@ -446,4 +469,6 @@ def get_statistics(db: Session = Depends(get_db)):
         pending_review=pending_review,
         approved_violations=approved_violations,
         rejected_violations=rejected_violations,
+        plates_detected=plates_detected,
+        unreadable_plates=unreadable_plates,
     )
