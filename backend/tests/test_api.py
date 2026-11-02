@@ -137,6 +137,47 @@ class HelmetDetectionAPITestCase(unittest.TestCase):
             if os.path.exists(test_file_path):
                 os.remove(test_file_path)
 
+    def test_10_number_plate_recognize_endpoint(self):
+        """Test the dedicated /api/number-plates/recognize endpoint with a genuine test image."""
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        sample_img_path = os.path.join(
+            os.path.dirname(root_dir), "number_plate", "test_images", "bike_02.jpg"
+        )
+        if not os.path.exists(sample_img_path):
+            self.skipTest("Sample image bike_02.jpg not found")
+
+        with open(sample_img_path, "rb") as f:
+            response = self.client.post(
+                "/api/number-plates/recognize",
+                files={"file": ("bike_02.jpg", f, "image/jpeg")},
+                data={"conf_threshold": "0.15", "ocr_conf_threshold": "0.20"},
+            )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("total_detected", data)
+        self.assertIn("number_plate_results", data)
+        self.assertGreaterEqual(data["total_detected"], 1)
+
+        first_plate = data["number_plate_results"][0]
+        self.assertIn("plate_text", first_plate)
+        self.assertIn("raw_ocr_text", first_plate)
+        self.assertIn("detector_confidence", first_plate)
+        self.assertIn("ocr_confidence", first_plate)
+        self.assertIn("plate_box", first_plate)
+        self.assertIn("status", first_plate)
+        self.assertIn(first_plate["status"], ["recognized", "unreadable"])
+
+    def test_11_number_plate_recognize_invalid_type(self):
+        """Uploading non-image to number plate endpoint returns 400."""
+        import io
+        fake_pdf = io.BytesIO(b"%PDF-1.4 dummy content")
+        response = self.client.post(
+            "/api/number-plates/recognize",
+            files={"file": ("document.pdf", fake_pdf, "application/pdf")},
+        )
+        self.assertEqual(response.status_code, 400)
+
 
 if __name__ == "__main__":
     unittest.main()
+

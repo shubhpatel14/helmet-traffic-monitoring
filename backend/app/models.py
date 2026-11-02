@@ -1,7 +1,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, Integer, String, Text, func
+from sqlalchemy import DateTime, Float, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -43,6 +43,24 @@ class Violation(Base):
     evidence_path: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
+    )
+
+    detector_confidence: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+        default=None,
+    )
+
+    ocr_confidence: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+        default=None,
+    )
+
+    recognition_status: Mapped[str | None] = mapped_column(
+        String(20),
+        nullable=True,
+        default=None,
     )
 
     created_at: Mapped[datetime] = mapped_column(

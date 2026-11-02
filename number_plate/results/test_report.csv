@@ -1,0 +1,13 @@
+image_name,vehicle_type,ground_truth_plate,detected_plates_count,primary_plate_box,detector_confidence,ocr_confidence,raw_ocr_text,predicted_plate_text,recognition_status,exact_match,processing_time_sec
+bike_01.jpg,Motorcycle,PB08BJ5222,1,"[377, 680, 1073, 1089]",0.176,0.981,W 03 PB 7632,W03PB7632,recognized,False,5.523
+bike_02.jpg,Motorcycle,GJ01NC2394,1,"[571, 612, 1142, 768]",0.825,0.566,GJINC 2394_,GJINC2394,recognized,False,0.655
+bike_03.jpg,Motorcycle,DL3SBR9322,0,[],0.0,0.0,,,no_detection,False,0.062
+bike_04.jpg,Motorcycle/Scooter,KA04HM3634,0,[],0.0,0.0,,,no_detection,False,0.143
+bike_05.jpg,Motorcycle,KA19P8488,2,"[0, 4, 441, 143]",0.272,0.0,,,unreadable,False,1.679
+bike_06.jpg,Motorcycle,PB10GJ6445,1,"[733, 1591, 1149, 1725]",0.346,0.255,PBiqgJ6445,PBIQGJ6445,recognized,False,0.595
+car_01.jpg,Car,WB04E4362,1,"[1302, 1374, 1903, 1727]",0.444,0.748,B1I89,,unreadable,False,1.557
+car_02.jpg,Car,DL8CAF5032,0,[],0.0,0.0,,,no_detection,False,0.079
+car_03.jpg,Car,MH01BA1984,0,[],0.0,0.0,,,no_detection,False,0.068
+car_04.jpg,Car,GJ01JC5555,1,"[1557, 1066, 1763, 1161]",0.695,0.574,"GJLIC "" 5555",GJLIC5555,recognized,False,0.702
+car_05.jpg,Car,KL07B5559,1,"[211, 381, 347, 420]",0.947,0.367,KL 78] 5559,KL785559,recognized,False,0.483
+car_06.jpg,Car/Auto,DL1RM0556,1,"[1318, 1729, 1538, 1838]",0.472,0.0,,,unreadable,False,0.638

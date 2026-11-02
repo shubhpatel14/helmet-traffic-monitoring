@@ -1,0 +1,13 @@
+image_name,vehicle_type,ground_truth_plate,resolution,lighting_condition,plate_angle,notes
+car_01.jpg,Car,WB04E4362,3504x2336,Daylight,Rear-oblique,Kolkata Ambassador Taxi commercial registration
+car_02.jpg,Car,DL8CAF5032,761x269,Overcast diffuse,Frontal,Hyundai i20 cropped bumper
+car_03.jpg,Car,MH01BA1984,640x480,Bright daylight,Rear-quarter,Yellow plated tourist vehicle in Mumbai
+car_04.jpg,Car,GJ01JC5555,2048x1536,Outdoor daylight,Front-oblique,Maruti rally car in Gujarat
+car_05.jpg,Car,KL07B5559,472x456,Daylight outdoor,Frontal,Volkswagen Beetle in Kochi Kerala
+car_06.jpg,Car/Auto,DL1RM0556,2592x1936,Bright outdoor,Rear-oblique,Delhi commercial vehicle
+bike_01.jpg,Motorcycle,PB08BJ5222,2000x2736,Daylight outdoor,Front-oblique,Royal Enfield Bullet in Punjab
+bike_02.jpg,Motorcycle,GJ01NC2394,1600x899,Warm lighting,Frontal,Royal Enfield Classic 350 Gujarat
+bike_03.jpg,Motorcycle,DL3SBR9322,1809x338,Indoor neutral,Frontal flat,Delhi two-wheeler registration plate
+bike_04.jpg,Motorcycle/Scooter,KA04HM3634,2592x1944,Direct sun,Rear flat,TVS WeGo scooter in Bangalore
+bike_05.jpg,Motorcycle,KA19P8488,796x205,Neutral diffuse,Frontal flat,Karnataka motorcycle registration plate
+bike_06.jpg,Motorcycle,PB10GJ6445,3888x2592,Sunlight street,Rear-oblique,Two-wheeler in Amritsar street traffic

@@ -6,14 +6,14 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./helmet_monitoring.db")
 
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL is missing from .env")
+connect_args = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
 
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
+    connect_args=connect_args,
 )
 
 SessionLocal = sessionmaker(

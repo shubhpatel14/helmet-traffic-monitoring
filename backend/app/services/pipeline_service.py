@@ -213,11 +213,24 @@ def analyze_traffic_image(
         helmet_detected = True
         review_status = "approved"
 
-    # 4. Extract Primary License Plate Text
+    # 4. Extract Primary License Plate Text & Details
     recognized_plates = [
         p["plate_text"] for p in plate_detections if p.get("plate_text")
     ]
-    primary_plate = recognized_plates[0] if recognized_plates else None
+    primary_plate = None
+    primary_det_conf = None
+    primary_ocr_conf = None
+    primary_status = None
+
+    if plate_detections:
+        recognized_candidates = [
+            p for p in plate_detections if p.get("status") == "recognized" and p.get("plate_text")
+        ]
+        primary = recognized_candidates[0] if recognized_candidates else plate_detections[0]
+        primary_plate = primary.get("plate_text")
+        primary_det_conf = primary.get("detector_confidence")
+        primary_ocr_conf = primary.get("ocr_confidence")
+        primary_status = primary.get("status", "unreadable")
 
     # 5. Save Annotated Evidence File
     annotated = annotate_frame(image, helmet_detections, plate_detections, is_mock=is_mock)
@@ -236,6 +249,9 @@ def analyze_traffic_image(
         detection_source=source_tag,
         review_status=review_status,
         evidence_path=evidence_url_path,
+        detector_confidence=primary_det_conf,
+        ocr_confidence=primary_ocr_conf,
+        recognition_status=primary_status,
     )
     db.add(violation)
     db.commit()
@@ -265,6 +281,9 @@ def analyze_traffic_image(
             "review_status": violation.review_status,
             "evidence_path": violation.evidence_path,
             "created_at": violation.created_at,
+            "detector_confidence": violation.detector_confidence,
+            "ocr_confidence": violation.ocr_confidence,
+            "recognition_status": violation.recognition_status,
         },
         "helmet_classification": [
             {
@@ -278,7 +297,11 @@ def analyze_traffic_image(
             {
                 "plate_box": p["plate_box"],
                 "confidence": p["detector_confidence"],
+                "detector_confidence": p["detector_confidence"],
+                "ocr_confidence": p.get("ocr_confidence", 0.0),
+                "raw_ocr_text": p.get("raw_ocr_text", ""),
                 "plate_text": p["plate_text"],
+                "status": p.get("status", "unreadable"),
             }
             for p in plate_detections
         ],

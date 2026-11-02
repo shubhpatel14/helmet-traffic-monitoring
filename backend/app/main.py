@@ -2,6 +2,8 @@ import os
 from datetime import datetime
 from typing import Optional
 
+import cv2
+import numpy as np
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -79,9 +81,26 @@ class ViolationResponse(BaseModel):
     review_status: str
     evidence_path: Optional[str]
     created_at: datetime
+    detector_confidence: Optional[float] = None
+    ocr_confidence: Optional[float] = None
+    recognition_status: Optional[str] = None
 
     class Config:
         from_attributes = True
+
+
+class NumberPlateResultItem(BaseModel):
+    plate_text: Optional[str] = None
+    raw_ocr_text: str = ""
+    detector_confidence: float = 0.0
+    ocr_confidence: float = 0.0
+    plate_box: list[int] = []
+    status: str = "unreadable"
+
+
+class NumberPlateResponse(BaseModel):
+    total_detected: int
+    number_plate_results: list[NumberPlateResultItem]
 
 
 class StatusUpdate(BaseModel):
@@ -230,6 +249,68 @@ async def analyze_traffic_frame(
         raise HTTPException(
             status_code=500,
             detail=f"Error executing computer vision pipeline: {err}",
+        )
+
+
+@app.post(
+    "/api/number-plates/recognize",
+    response_model=NumberPlateResponse,
+    tags=["Number Plate"],
+)
+async def recognize_vehicle_number_plate(
+    file: UploadFile = File(..., description="Vehicle image or traffic frame"),
+    conf_threshold: float = Form(
+        default=0.15, ge=0.01, le=1.0, description="Detection confidence threshold"
+    ),
+    ocr_conf_threshold: float = Form(
+        default=0.20, ge=0.01, le=1.0, description="OCR confidence threshold"
+    ),
+):
+    """Detect and recognize Indian vehicle number plates using YOLOv8 and EasyOCR."""
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded file must be a valid image (JPEG, PNG, etc.).",
+        )
+
+    image_bytes = await file.read()
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Empty image file received.")
+
+    np_arr = np.frombuffer(image_bytes, np.uint8)
+    image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    if image is None:
+        raise HTTPException(status_code=400, detail="Unable to decode image format.")
+
+    try:
+        from number_plate.pipeline import process_traffic_image
+
+        results = process_traffic_image(
+            image,
+            conf_threshold=conf_threshold,
+            ocr_conf_threshold=ocr_conf_threshold,
+        )
+
+        clean_items = [
+            NumberPlateResultItem(
+                plate_text=item.get("plate_text"),
+                raw_ocr_text=item.get("raw_ocr_text", ""),
+                detector_confidence=float(item.get("detector_confidence", 0.0)),
+                ocr_confidence=float(item.get("ocr_confidence", 0.0)),
+                plate_box=item.get("plate_box", []),
+                status=item.get("status", "unreadable"),
+            )
+            for item in results
+        ]
+
+        return NumberPlateResponse(
+            total_detected=len(clean_items),
+            number_plate_results=clean_items,
+        )
+    except Exception as err:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing number plate recognition: {err}",
         )
 
 

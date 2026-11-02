@@ -324,7 +324,26 @@ async function handleImageAnalysis(file) {
       : "• No riders/helmets localized";
 
     const plateSummary = plateDetections.length > 0
-      ? plateDetections.map((p) => `• "${p.plate_text || "Unreadable"}" (Conf: ${p.confidence || p.detector_confidence || 0})`).join("<br>")
+      ? plateDetections.map((p, idx) => {
+          const text = p.plate_text ? `<strong style="font-family:monospace; color:#38BDF8;">${p.plate_text}</strong>` : `<span style="color:var(--text-muted); font-style:italic;">Unreadable</span>`;
+          const statusBadge = p.status === "recognized"
+            ? `<span class="badge badge-approved" style="font-size:0.75rem;">Recognized</span>`
+            : `<span class="badge badge-pending" style="font-size:0.75rem;">Unreadable</span>`;
+          const detConf = (p.detector_confidence ?? p.confidence ?? 0).toFixed(3);
+          const ocrConf = (p.ocr_confidence ?? 0).toFixed(3);
+          const boxStr = p.plate_box ? `[${p.plate_box.join(", ")}]` : "N/A";
+          const rawStr = p.raw_ocr_text ? ` <span style="color:var(--text-muted); font-size:0.75rem;">(Raw: "${p.raw_ocr_text}")</span>` : "";
+
+          return `<div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); padding:6px 10px; border-radius:6px; margin-top:4px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>Plate #${idx + 1}: ${text} ${rawStr}</div>
+              <div>${statusBadge}</div>
+            </div>
+            <div style="font-size:0.76rem; color:var(--text-secondary); margin-top:2px;">
+              Box: <code>${boxStr}</code> • YOLO Conf: <strong>${detConf}</strong> • OCR Conf: <strong>${ocrConf}</strong>
+            </div>
+          </div>`;
+        }).join("")
       : "• No license plate localized";
 
     const isMock = Boolean(data.is_mock_inference);
@@ -340,10 +359,10 @@ async function handleImageAnalysis(file) {
         <div><strong>Backend Model Status:</strong> <code style="color:var(--accent-teal);">${modelStatus}</code></div>
         <div><strong>Detection Verdict:</strong> ${data.summary}</div>
         <div><strong>Helmet Status:</strong> <br>${helmetSummary}</div>
-        <div><strong>Plate Recognition:</strong> <br>${plateSummary}</div>
+        <div><strong>Plate Recognition:</strong> ${plateSummary}</div>
         <div><strong>Review Status:</strong> <span class="badge badge-${v.review_status}">${v.review_status}</span></div>
         <div style="font-size:0.75rem; color:var(--text-muted); font-style:italic; border-top:1px solid var(--border-subtle); padding-top:6px;">
-          Note: Final helmet model training is currently in progress. Inference outputs here demonstrate workflow integration and are not validated final-model predictions.
+          Note: Final helmet model training is currently in progress. Number plate recognition uses genuine YOLOv8n detector and EasyOCR.
         </div>
       </div>
     `;
@@ -374,12 +393,19 @@ function openModal(item) {
   modalImg.src = evidenceSrc;
   document.getElementById("modalTitle").innerText = `Violation Record #${item.id} Review`;
 
+  const detConfStr = item.detector_confidence != null ? Number(item.detector_confidence).toFixed(3) : "N/A";
+  const ocrConfStr = item.ocr_confidence != null ? Number(item.ocr_confidence).toFixed(3) : "N/A";
+  const statusStr = item.recognition_status || (item.number_plate ? "recognized" : "unreadable");
+
   modalInfo.innerHTML = `
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; font-size:0.88rem;">
       <div><strong>License Plate:</strong> ${item.number_plate || "(unreadable)"}</div>
+      <div><strong>Plate Status:</strong> <span class="badge badge-${statusStr === 'recognized' ? 'approved' : 'pending'}">${statusStr}</span></div>
       <div><strong>Helmet Status:</strong> ${item.helmet_detected ? "With Helmet (Compliant)" : "Without Helmet (Violation)"}</div>
-      <div><strong>Source:</strong> ${item.detection_source}</div>
       <div><strong>Review State:</strong> <span class="badge badge-${item.review_status}">${item.review_status}</span></div>
+      <div><strong>YOLO Confidence:</strong> ${detConfStr}</div>
+      <div><strong>OCR Confidence:</strong> ${ocrConfStr}</div>
+      <div><strong>Source:</strong> ${item.detection_source}</div>
       <div><strong>Logged Timestamp:</strong> ${new Date(item.created_at).toLocaleString()}</div>
     </div>
   `;
